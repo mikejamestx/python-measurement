@@ -213,6 +213,16 @@ class MeasureBase(object):
             self.unit
         )
 
+    def __format__(self, fmt):
+        if not isinstance(fmt, str):
+            raise TypeError("must be str, not %s" % type(fmt).__name__)
+        if len(fmt) != 0:
+            unit_str = fmt.replace("%u", self.unit_label)
+            fmt = fmt.replace("%u", "").strip()
+            val_str = self.value.__format__(fmt)
+            return unit_str.replace(fmt, val_str)
+        return str(self)
+
     # **** Comparison methods ****
 
     def __eq__(self, other):
@@ -545,6 +555,17 @@ class BidimensionalMeasure(object):
             self.primary.unit,
             self.reference.unit,
         )
+
+    def __format__(self, fmt):
+        print(fmt)
+        if not isinstance(fmt, str):
+            raise TypeError("must be str, not %s" % type(fmt).__name__)
+        if len(fmt) != 0:
+            unit_str = fmt.replace("%u", self.unit_label)
+            fmt = fmt.replace("%u", "").strip()
+            val_str = self.value.__format__(fmt)
+            return unit_str.replace(fmt, val_str)
+        return str(self)
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):
