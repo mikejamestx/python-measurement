@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 from sympy import S, Symbol
 
 from measurement.base import MeasureBase
@@ -20,4 +23,8 @@ class Temperature(MeasureBase):
         'celsius': 'c',
         'fahrenheit': 'f',
         'kelvin': 'k',
+    }
+    LABEL = {
+        'c': u"°C",
+        'f': u"°F",
     }
