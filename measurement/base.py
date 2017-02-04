@@ -183,6 +183,13 @@ class MeasureBase(object):
             raise ValueError('Invalid unit %s' % value)
         self._default_unit = unit
 
+    @property
+    def unit_label(self):
+        try:
+            return self.LABEL[self.unit]
+        except:
+            return self.unit
+
     def __getattr__(self, name):
         units = self.get_units()
         if name in units:
@@ -494,6 +501,15 @@ class BidimensionalMeasure(object):
             self.primary.standard = self.primary.standard / reference_chg
         self.primary.unit = primary
         self.reference.unit = reference
+
+    @property
+    def unit_label(self):
+        if self.unit in self.LABEL:
+            return self.LABEL[self.unit]
+        else:
+            return "{}/{}".format(
+                self.primary.unit_label, self.reference.unit_label
+            )
 
     def _normalize(self, other):
         std_value = getattr(other, self.unit)
