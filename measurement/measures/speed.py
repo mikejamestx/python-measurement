@@ -17,4 +17,15 @@ class Speed(BidimensionalMeasure):
     ALIAS = {
         'mph': 'mi__hr',
         'kph': 'km__hr',
+        'm/s': 'm__s',
+        'kt': 'nmi__hr',
+        'kts': 'nmi__hr',
+        'Knots': 'nmi__hr',
+        'mm/s': 'mm__s',
+        'cm/s': 'cm__s',
+        'ft/s': 'ft__s',
+
+    }
+    LABEL = {
+        'nmi__hr': 'kt'
     }
