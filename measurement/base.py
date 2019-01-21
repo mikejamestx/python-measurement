@@ -26,17 +26,24 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
-from decimal import Decimal
+from abc import ABCMeta, abstractmethod
 
 import six
-import sympy
-from sympy.solvers import solve_linear
+# import sympy
+# from sympy.solvers import solve_linear
 
 from measurement.utils import total_ordering
 
+FLOAT_TYPES = (float,)
 
-NUMERIC_TYPES = six.integer_types + (float, Decimal)
+try:
+    from numpy import ndarray
+    from numpy.ma.core import MaskedArray
+    FLOAT_TYPES = (float, ndarray, MaskedArray)
+finally:
+    pass
 
+NUMERIC_TYPES = six.integer_types + FLOAT_TYPES
 
 def pretty_name(obj):
     return obj.__name__ if obj.__class__ == type else obj.__class__.__name__
@@ -45,6 +52,30 @@ def pretty_name(obj):
 class classproperty(property):
     def __get__(self, cls, owner):
         return self.fget.__get__(None, owner)()
+
+
+class TransformationBase(metaclass=ABCMeta):
+    @abstractmethod
+    def from_su(self, val):
+        """Convert from the standard unit"""
+
+    @abstractmethod
+    def to_su(self, val):
+        """Convert to the standard unit"""
+
+
+class SimpleTransform(TransformationBase):
+    def __init__(self, to_fcn, from_fcn):
+        assert callable(from_fcn)
+        assert callable(to_fcn)
+        self._from_fcn = from_fcn
+        self._to_fcn = to_fcn
+
+    def to_su(self, val):
+        return self._to_fcn(val)
+
+    def from_su(self, val):
+        return self._from_fcn(val)
 
 
 @total_ordering
@@ -158,8 +189,10 @@ class MeasureBase(object):
         units = self.get_units()
         u1 = units[self.STANDARD_UNIT]
         u2 = units[self.unit]
-
-        self.standard = value * (u2 / u1)
+        if isinstance(u2, TransformationBase):
+            self.standard = u2.to_su(value)
+        else:
+            self.standard = value * (u2 / u1)
 
     @property
     def unit(self):
@@ -178,7 +211,7 @@ class MeasureBase(object):
         elif value.lower() in units:
             unit = value.lower()
         elif value.lower() in laliases:
-            unit = laliases[value.lower]
+            unit = laliases[value.lower()]
         if not unit:
             raise ValueError('Invalid unit %s' % value)
         self._default_unit = unit
@@ -214,8 +247,8 @@ class MeasureBase(object):
         )
 
     def __format__(self, fmt):
-        if not isinstance(fmt, str):
-            raise TypeError("must be str, not %s" % type(fmt).__name__)
+#         if not isinstance(fmt, str):
+#             raise TypeError("must be str, not %s" % type(fmt).__name__)
         if len(fmt) != 0:
             unit_str = fmt.replace("%u", self.unit_label)
             fmt = fmt.replace("%u", "").strip()
@@ -353,25 +386,31 @@ class MeasureBase(object):
         return type(self).__bool__(self)
 
     def _convert_value_to(self, unit, value):
-        if not isinstance(value, float):
+        if not isinstance(value, FLOAT_TYPES):
             value = float(value)
 
-        if isinstance(unit, sympy.Expr):
-            result = unit.evalf(
-                subs={
-                    self.SU: value
-                }
-            )
-            return float(result)
-        return value / unit
+#         if isinstance(unit, sympy.Expr):
+#             result = unit.evalf(
+#                 subs={
+#                     self.SU: value
+#                 }
+#             )
+#             return float(result)
+        if isinstance(unit, TransformationBase):
+            return unit.from_su(value)
+        else:
+            return value / unit
 
     def _convert_value_from(self, unit, value):
-        if not isinstance(value, float):
+        if not isinstance(value, FLOAT_TYPES):
             value = float(value)
-
-        if isinstance(unit, sympy.Expr):
-            _, result = solve_linear(unit, value)
-            return result
+        if isinstance(unit, TransformationBase):
+            return unit.to_su(value)
+        elif callable(unit):
+            return unit(value)
+#         if isinstance(unit, sympy.Expr):
+#             _, result = solve_linear(unit, value)
+#             return result
         return unit * value
 
     def default_units(self, kwargs):
@@ -557,9 +596,8 @@ class BidimensionalMeasure(object):
         )
 
     def __format__(self, fmt):
-        print(fmt)
-        if not isinstance(fmt, str):
-            raise TypeError("must be str, not %s" % type(fmt).__name__)
+#         if not isinstance(fmt, str):
+#             raise TypeError("must be str, not %s" % type(fmt).__name__)
         if len(fmt) != 0:
             unit_str = fmt.replace("%u", self.unit_label)
             fmt = fmt.replace("%u", "").strip()

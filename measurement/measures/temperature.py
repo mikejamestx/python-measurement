@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from sympy import S, Symbol
-
-from measurement.base import MeasureBase
+from measurement.base import MeasureBase, SimpleTransform
 
 
 __all__ = [
@@ -12,12 +10,17 @@ __all__ = [
 
 
 class Temperature(MeasureBase):
-    SU = Symbol('kelvin')
     STANDARD_UNIT = 'k'
     UNITS = {
-        'c': SU - S(273.15),
-        'f': (SU - S(273.15)) * S('9/5') + 32,
-        'k': 1.0
+        'c': SimpleTransform(
+            to_fcn=lambda c: c + 273.15,
+            from_fcn=lambda k: k - 273.15
+        ),
+        'f': SimpleTransform(
+            to_fcn=lambda f: (f - 32) * 5.0 / 9 + 273.15,
+            from_fcn=lambda k: (k - 273.15) * 9.0 / 5 + 32
+        ),
+        'k': 1.0,
     }
     ALIAS = {
         'celsius': 'c',
@@ -27,4 +30,15 @@ class Temperature(MeasureBase):
     LABEL = {
         'c': u"°C",
         'f': u"°F",
+        'k': u'K',
     }
+
+    @staticmethod
+    def average(items, default_unit='c'):
+        """
+        Since temperature unit scales other than Kelvin have arbitrary zero
+        points, we must force the sum to be in Kelvin
+        """
+        avg = sum(items, Temperature(k=0)) / len(items)
+        avg.unit = default_unit
+        return avg

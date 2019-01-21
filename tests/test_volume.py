@@ -13,3 +13,25 @@ class VolumeTest(MeasurementTestBase):
             milliliters.standard,
             fl_oz.standard
         )
+
+    def test_multiply_divide(self):
+        vol = Volume(ML=100)
+        result = vol * 2
+        self.assertEqual(result.ml, 200)
+        result *= 2
+        self.assertEqual(result.ml, 400)
+        with self.assertRaises(TypeError):
+            vol * vol
+        with self.assertRaises(TypeError):
+            vol *= vol
+        with self.assertRaises(TypeError):
+            vol /= vol
+
+        result /= 4
+        self.assertEqual(result.ml, 100)
+        result = result / 2
+        self.assertEqual(result.ml, 50)
+        result = vol / vol
+        self.assertEqual(result, 1)
+
+

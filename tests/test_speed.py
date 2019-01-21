@@ -1,6 +1,6 @@
 from .base import MeasurementTestBase
 
-
+from measurement.base import pretty_name
 from measurement.measures import Speed
 
 
@@ -112,6 +112,10 @@ class SpeedTest(MeasurementTestBase):
             actual_value,
             expected_value,
         )
+        train_2 = Speed(mile__hour=5)
+        actual_value = train_1 / train_2
+        expected_value = 2
+        self.assertEqual(actual_value, expected_value)
 
     def test_idiv(self):
         train_1 = Speed(mile__hour=10)
@@ -202,3 +206,11 @@ class SpeedTest(MeasurementTestBase):
             expected_value,
             actual_value,
         )
+
+    def test_string_formatting(self):
+        speed = Speed(m__s=1)
+        self.assertEqual(speed.unit_label, u"m/s")
+        self.assertEqual("1.0 m/s", "{:.1f %u}".format(speed))
+        self.assertEqual("1.0 m/s", "{}".format(speed))
+        self.assertEqual("Speed(m__s=1.0)", repr(speed))
+

@@ -75,15 +75,7 @@ class Pressure(MeasureBase):
     def __getattr__(self, name):
         if name == "m_seawater":
             return self.to_meters_of_seawater()
-
-        units = self.get_units()
-        if name in units:
-            return self._convert_value_to(
-                units[name],
-                self.standard,
-            )
-        else:
-            raise AttributeError('Unknown unit type: %s' % name)
+        return super(Pressure, self).__getattr__(name)
 
     def __format__(self, fmt):
         try:
@@ -91,9 +83,12 @@ class Pressure(MeasureBase):
         except ApproximatedDepthError as e:
             if self.dbar > 5:
                 raise
-            prec = int("".join(x for x in fmt.split(".")[1] if x.isdigit()))
-            if prec > 2:
-                raise
+            try:
+                prec = int("".join(x for x in fmt.split(".")[1] if x.isdigit()))
+                if prec > 2:
+                    raise
+            except IndexError:
+                pass
             _unit = self.unit
             self.unit = 'dbar'
             if len(fmt) != 0:
@@ -103,7 +98,6 @@ class Pressure(MeasureBase):
             self.unit = _unit
             val = val.replace('dbar', self.unit_label)
         return val
-
 
     def to_meters_of_seawater(self):
         """

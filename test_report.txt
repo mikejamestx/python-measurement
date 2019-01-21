@@ -1,0 +1,21 @@
+Name                                  Stmts   Miss  Cover   Missing
+-------------------------------------------------------------------
+measurement/__init__.py                   0      0   100%
+measurement/base.py                     369    107    71%   41-42, 52, 207-212, 214, 219-222, 232, 235, 242, 248-255, 263, 266-269, 280, 287-291, 298-304, 311-315, 322-328, 335-339, 346, 350, 357, 364, 367-371, 378, 381, 384, 388, 408, 435-436, 438-440, 452-462, 484, 524, 554-557, 582, 590, 597-605, 611, 617, 632, 644, 663, 675, 693, 707, 715-716, 728, 739, 746, 749, 755
+measurement/measures/__init__.py         13      0   100%
+measurement/measures/capacitance.py       7      0   100%
+measurement/measures/current.py           7      0   100%
+measurement/measures/distance.py         25      4    84%   160-166, 173
+measurement/measures/energy.py            7      0   100%
+measurement/measures/frequency.py         7      0   100%
+measurement/measures/mass.py              8      0   100%
+measurement/measures/pressure.py         58     24    59%   16, 72, 77, 86, 89-105, 115, 118-120
+measurement/measures/resistance.py        7      0   100%
+measurement/measures/speed.py             9      0   100%
+measurement/measures/temperature.py      12      0   100%
+measurement/measures/time.py              7      0   100%
+measurement/measures/voltage.py           7      0   100%
+measurement/measures/volume.py            9      0   100%
+measurement/utils.py                     32     13    59%   12-37, 57
+-------------------------------------------------------------------
+TOTAL                                   584    148    75%

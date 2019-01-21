@@ -2,4 +2,6 @@ import unittest
 
 
 class MeasurementTestBase(unittest.TestCase):
-    pass
+    """Base test case"""
+
+
